@@ -1,17 +1,17 @@
-
-const {getTweets , createTweet, deleteTweet, getTweet, updateTweet} = require ('../queries/tweets.queries');
+const {getTweets , createTweet, deleteTweet, getTweet, updateTweet, getCurrentUserTweetsWithFollowing} = require ('../queries/tweets.queries');
 
 exports.tweetList = async (req, res, next) =>{
     try{
-      const tweets =  await getTweets();
-      res.render('tweets/tweet', { tweets, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
+      const tweets =  await getCurrentUserTweetsWithFollowing(req.user);
+      res.render('tweets/tweet', { tweets, isAuthenticated: req.isAuthenticated(), currentUser: req.user, user: req.user ,editable: true});
     } catch(e) {
         next(e);
     }
 }
 
-exports.tweetNew = (req, res, next) =>{
-    res.render('tweets/tweet_form',{ tweet: {},isAuthenticated: req.isAuthenticated(), currentUser: req.user });
+exports.tweetNew = async (req, res, next) =>{
+   
+    res.render('tweets/tweet_form',{ tweet: {},isAuthenticated: req.isAuthenticated(), currentUser: req.user , user: req.user});
 }
 
 exports.tweetCreate = async (req, res, next) =>{
@@ -28,8 +28,8 @@ exports.tweetDelete = async (req, res, next) => {
     try{
         const tweetId = req.params.tweetId;
         await deleteTweet(tweetId);
-        const tweets = await getTweets();
-        res.render('tweets/tweet_list',{ tweets});
+        const tweets = await getCurrentUserTweetsWithFollowing(req.user);
+        res.render('tweets/tweet_list',{ tweets, currentUser:req.user, editable:true});
     }catch(e){
         next(e);
     }
@@ -39,7 +39,7 @@ exports.tweetEdit = async (req, res, next) =>{
     try{
         const tweetId = req.params.tweetId;
         const tweet = await getTweet(tweetId);
-        res.render('tweets/tweet_form',  { tweets, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
+        res.render('tweets/tweet_form',  { tweet, isAuthenticated: req.isAuthenticated(),user: req.user, currentUser: req.user });
     }catch(e){
         next(e);
     }    
@@ -48,7 +48,6 @@ exports.tweetEdit = async (req, res, next) =>{
 exports.tweetUpdate = async (req, res, next) => {
     const tweetId = req.params.tweetId;
     try{
-      
         const body = req.body;
         await updateTweet(tweetId, body);
         res.redirect('/tweets');

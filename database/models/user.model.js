@@ -24,7 +24,8 @@ const userSchema = schema({
     avatar:{
         type: String, 
         default: '/images/default-profile.png'
-    }
+    },
+    following: {type: [schema.Types.ObjectId], ref: 'user'}
 });
 
 userSchema.statics.hashPassword = (password) => {

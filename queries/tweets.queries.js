@@ -1,5 +1,6 @@
 const Tweet = require('../database/models/tweet.model');
 
+
 exports.getTweets = () =>{
     return Tweet.find({}).exec();
 }
@@ -20,5 +21,14 @@ exports.getTweet = (tweetId) => {
 
 exports.updateTweet = (tweetId, tweet) => {
     return Tweet.findByIdAndUpdate(tweetId, {$set: { content: tweet.content}}, {runValidators: true}).exec();
+}
+
+
+exports.getCurrentUserTweetsWithFollowing = (user) => {
+    return Tweet.find({ author: { $in: [ ...user.following, user._id ] }}).populate('author').exec();
+}
+// Rechercher les tweet à partir du username
+exports.getUserTweetsFromAuthorId = (authorId) => {
+    return Tweet.find({ author: authorId}).populate('author').exec();
 }
 
